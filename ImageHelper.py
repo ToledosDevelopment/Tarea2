@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import hashlib
 from JSONHelper import JSONHelper
+import math
 
 cache = JSONHelper("cache.json")
 
