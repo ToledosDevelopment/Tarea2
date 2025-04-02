@@ -28,6 +28,12 @@ def getPixels(image : Image):
         pixel_values = np.array(pixel_values).reshape((width, height, channels))
     return pixel_values
 
+def getTxtImageFile(image: Image):
+    pixels = getPixels(image)
+    pixels[pixels == 255] = 1
+    if pixels is not None:
+        np.savetxt("pixels.txt", pixels.reshape(-1, pixels.shape[-1]), fmt="%d")
+
 def getOnePixels(image : Image):
     height, width  = image.size
     pixels : np = getPixels(image)

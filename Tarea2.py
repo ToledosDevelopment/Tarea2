@@ -11,6 +11,6 @@ for im in images:
     im.id = ImageHelper.getImageID(im)
 
 baseImage = images[0]
-print(ImageHelper.ScaleImagesToEqualOnePixels(baseImage, images))
+# print(ImageHelper.ScaleImagesToEqualOnePixels(baseImage, images))
 
-
+ImageHelper.getTxtImageFile(baseImage)
