@@ -171,11 +171,11 @@ def getCentralMoment(image : Image, p : int, q : int): # this one is translation
     if image.mode == "RGB":
         for y in range(height):
             for x in range(width):
-                centralMoment += (x - massCenter[0])**p * (y - massCenter[1])**q * np.sum(pixels[y][x])
+                centralMoment += (x - massCenter["x"])**p * (y - massCenter["y"])**q * np.sum(pixels[y][x])
     else:
         for y in range(height):
             for x in range(width):
-                centralMoment += (x - massCenter[0])**p * (y - massCenter[1])**q * pixels[y][x]
+                centralMoment += (x - massCenter["x"])**p * (y - massCenter["y"])**q * pixels[y][x]
     
     cache.set_value(path, centralMoment)
     return centralMoment
