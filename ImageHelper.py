@@ -22,7 +22,10 @@ def getPixels(image : Image):
     else:
         print("Unknown mode: %s" % image.mode)
         return None
-    pixel_values = np.array(pixel_values).reshape((width, height, channels))
+    if channels == 1:
+        pixel_values = np.array(pixel_values).reshape((width, height))
+    else:
+        pixel_values = np.array(pixel_values).reshape((width, height, channels))
     return pixel_values
 
 def getOnePixels(image : Image):
