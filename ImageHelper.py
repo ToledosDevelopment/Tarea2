@@ -236,9 +236,9 @@ def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
         if scale != 1:
             scaledImage = scaleImage(images[i], scale=scale)
         scaledImages.append(images[i])
-        nuInvariant[0].append(getNuInvariant(scaledImage, 0, 0))
-        nuInvariant[1].append(getNuInvariant(scaledImage, 1, 1))
-        nuInvariant[2].append(getNuInvariant(scaledImage, 2, 2))
+        nuInvariantScaled[0].append(getNuInvariant(scaledImage, 0, 0))
+        nuInvariantScaled[1].append(getNuInvariant(scaledImage, 1, 1))
+        nuInvariantScaled[2].append(getNuInvariant(scaledImage, 2, 2))
 
         scales.append(scale)
     
