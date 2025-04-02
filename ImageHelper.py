@@ -179,7 +179,7 @@ def getCentralMoment(image : Image, p : int, q : int): # this one is translation
         for y in range(height):
             for x in range(width):
                 centralMoment += (x - massCenter['x'])**p * (y - massCenter['y'])**q * pixels[y][x]
-    cache.set_value(path, centralMoment[0])
+    cache.set_value(path, centralMoment)
     return centralMoment
 
 def getRawMoment(image : Image, p : int, q : int):
@@ -210,7 +210,7 @@ def getNuInvariant(image : Image, p : int, q : int):
     mpq = getCentralMoment(image, p, q)
 
     npq = mpq / m00**((p+q)/2 + 1)
-    cache.set_value(npqPath, npq[0])
+    cache.set_value(npqPath, npq)
     return npq
 
 def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
@@ -232,20 +232,13 @@ def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
     for i in range(images.__len__()):
         root = np.sqrt(pixelsNoScaled[i])
         scale = (base - root) / root + 1
-        im = images[i]
-        if scale == 1:
-            scaledImages.append(images[i])
-            # pixelsScaled.append(getOnePixels(images[i]))
-            nuInvariantScaled[0].append(nuInvariant[0][i])
-            nuInvariantScaled[1].append(nuInvariant[1][i])
-            nuInvariantScaled[2].append(nuInvariant[2][i])
-        else:
-            image = scaleImage(images[i], scale=scale)
-            scaledImages.append(image)
-            # pixelsScaled.append(getOnePixels(image))
-            nuInvariantScaled[0].append(getNuInvariant(im, 0, 0))
-            nuInvariantScaled[1].append(getNuInvariant(im, 1, 1))
-            nuInvariantScaled[2].append(getNuInvariant(im, 2, 2))
+        scaledImage = images[i]
+        if scale != 1:
+            scaledImage = scaleImage(images[i], scale=scale)
+        scaledImages.append(images[i])
+        nuInvariant[0].append(getNuInvariant(scaledImage, 0, 0))
+        nuInvariant[1].append(getNuInvariant(scaledImage, 1, 1))
+        nuInvariant[2].append(getNuInvariant(scaledImage, 2, 2))
 
         scales.append(scale)
     
