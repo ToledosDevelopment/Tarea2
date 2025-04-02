@@ -126,7 +126,7 @@ def translateImage(image : Image, tx : int = 0, ty : int = 0):
 #     return Image.fromarray(image_translated)
 
 def getMassCenter(image: Image):
-    path = f"mass_center.${image.id}"
+    path = f"mass_center.{image.id}"
     massCenter = cache.get_value(path)
     if massCenter != None:
         return massCenter
@@ -161,23 +161,22 @@ def getCentralMoment(image : Image, p : int, q : int): # this one is translation
     massCenter = getMassCenter(image)
     width, height = pixels.shape[1], pixels.shape[0]
 
-    path = f"m${p}${q}.${image.id}"
+    path = f"m{p}{q}.{image.id}"
 
     centralMoment = cache.get_value(path)
-
     if centralMoment != None:
         return centralMoment
+    else: centralMoment = 0
 
     if image.mode == "RGB":
         for y in range(height):
             for x in range(width):
-                centralMoment += (x - massCenter["x"])**p * (y - massCenter["y"])**q * np.sum(pixels[y][x])
+                centralMoment += (x - massCenter['x'])**p * (y - massCenter['y'])**q * np.sum(pixels[y][x])
     else:
         for y in range(height):
             for x in range(width):
-                centralMoment += (x - massCenter["x"])**p * (y - massCenter["y"])**q * pixels[y][x]
-    
-    cache.set_value(path, centralMoment)
+                centralMoment += (x - massCenter['x'])**p * (y - massCenter['y'])**q * pixels[y][x]
+    cache.set_value(path, centralMoment[0])
     return centralMoment
 
 def getRawMoment(image : Image, p : int, q : int):
@@ -196,26 +195,19 @@ def getRawMoment(image : Image, p : int, q : int):
     return rawMoment
 
 def getNuInvariant(image : Image, p : int, q : int):
-    npqPath = f"n${p}{q}.${image.id}"
+    npqPath = f"n{p}{q}.{image.id}"
     npq = cache.get_value(npqPath)
+    print("Obteniendo npq")
 
     if npq != None:
         return npq
 
-    m00Path = f"m00.${image.id}"
-    m00 = cache.get_value(m00Path)
-    if m00 != None:
-        m00 = getCentralMoment(image, 0, 0)
-        cache.set_value(m00Path, m00)
-    
-    mpqPath = f"m${p}${q}.${image.id}"
-    mpq = cache.get_value(mpqPath)
-    if mpq != None:
-        mpq = getCentralMoment(image, p, q)
-        cache.set_value(mpqPath, mpq)
+    m00 = getCentralMoment(image, 0, 0)
+
+    mpq = getCentralMoment(image, p, q)
 
     npq = mpq / m00**((p+q)/2 + 1)
-    cache.set_value(npqPath, npq)
+    cache.set_value(npqPath, npq[0])
     return npq
 
 def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
