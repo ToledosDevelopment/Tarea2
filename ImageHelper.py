@@ -44,7 +44,12 @@ def getTxtImagesFromFolder(inputDir: str, outputDir: str):
     imgList = os.listdir(inputDir)
     images = [Image.open(os.path.join(inputDir, img)) for img in imgList]
 
-    for im, filename in zip(images, imgList):
+    for im in images:
+        im.id = getImageID(im)
+
+    scaledImages = ScaleImagesToEqualOnePixels(images[0],images)[0]
+
+    for im, filename in zip(scaledImages, imgList):
         
         # Generate output file path with same filename but .txt extension
         txt_filename = os.path.splitext(filename)[0] + ".txt"
@@ -94,7 +99,9 @@ def plotBinaryImagesFromFolder(TxtDir: str, outputDir: str):
 
             # Generate and save visualization
             plotBinaryImage(pixels, output_path)
-    pass
+    
+    print("Txt Images ploted and saved successfully!")
+
 
 def getOnePixels(image : Image):
     height, width  = image.size

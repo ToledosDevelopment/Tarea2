@@ -10,8 +10,9 @@ plot_img_dir = "plt_images"
 
 
 
-# ImageHelper.getTxtImagesFromFolder(img_dir, txt_dir)
+#ImageHelper.getTxtImagesFromFolder(img_dir, txt_dir)
 
 # Punto 5
 
-# ImageHelper.plotBinaryImagesFromFolder(txt_dir,plot_img_dir)
+#ImageHelper.plotBinaryImagesFromFolder(txt_dir,plot_img_dir)
+
