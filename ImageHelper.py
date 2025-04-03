@@ -54,6 +54,7 @@ def getTxtImagesFromFolder(inputDir: str, outputDir: str):
     imgList = os.listdir(inputDir)
     images = loadImages(inputDir)
 
+    # Los .txt serán a partir de las imgs escaladas a 1 pixeles
     scaledImages = ScaleImagesToEqualOnePixels(images[0],images)[0]
 
     for im, filename in zip(scaledImages, imgList):
