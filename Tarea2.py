@@ -17,4 +17,6 @@ contour_txt_dir = "contour_txt_images"
 
 # ImageHelper.plotBinaryImagesFromFolder(txt_dir,plot_img_dir)
 
-ImageHelper.getContoursOfFolder(txt_dir,contour_txt_dir)
+ImageHelper.plotBinaryImageNoGridFromFolder(contour_txt_dir,"contour_images")
+
+# ImageHelper.getContoursOfFolder(txt_dir,contour_txt_dir)

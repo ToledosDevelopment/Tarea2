@@ -73,6 +73,34 @@ def loadTxtImage(file_path):
     pixels = np.loadtxt(file_path, dtype=int)
     return pixels
 
+def plotBinaryImageNoGrid(pixels, output_path):
+    fig, ax = plt.subplots(figsize=(6, 6))
+
+    # Create a grid visualization
+    ax.imshow(pixels, cmap="gray", interpolation="nearest")
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    # Save the plot
+    plt.savefig(output_path, bbox_inches='tight', dpi=300)
+    plt.close()
+
+def plotBinaryImageNoGridFromFolder(TxtDir: str, outputDir: str):
+    os.makedirs(outputDir, exist_ok=True)
+    for txt_file in os.listdir(TxtDir):
+        if txt_file.endswith(".txt"):
+            txt_path = os.path.join(TxtDir, txt_file)
+            output_path = os.path.join(outputDir, txt_file.replace(".txt", ".png"))
+
+            # Load binary pixel data
+            pixels = loadTxtImage(txt_path)
+
+            # Generate and save visualization
+            plotBinaryImageNoGrid(pixels, output_path)
+    
+    print("Txt Images ploted and saved successfully!")
+
 # Function to generate a visualization of the 1-pixel cells
 def plotBinaryImage(pixels, output_path):
     fig, ax = plt.subplots(figsize=(6, 6))
