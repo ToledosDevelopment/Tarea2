@@ -282,10 +282,9 @@ def getRawMoment(image : Image, p : int, q : int):
     
     return rawMoment
 
-def getNuInvariant(image : Image, p : int, q : int):
+def getEtaInvariant(image : Image, p : int, q : int):
     npqPath = f"n{p}{q}.{image.id}"
     npq = cache.get_value(npqPath)
-    print("Obteniendo npq")
 
     if npq != None:
         return npq
@@ -297,6 +296,13 @@ def getNuInvariant(image : Image, p : int, q : int):
     npq = mpq / m00**((p+q)/2 + 1)
     cache.set_value(npqPath, npq)
     return npq
+
+def getPhiInvariants(image : Image):
+    phi1 = getCentralMoment(image, 2, 0) + getCentralMoment(image, 0, 2)
+    phi2 = getCentralMoment(image, 2, 0) - getCentralMoment(image, 0, 2) ** 2 + 4 * getCentralMoment(image, 1, 1) ** 2
+    phi3 = (getCentralMoment(image, 3, 0) - 3 * getCentralMoment(image, 1, 2)) ** 2 + (3 * getCentralMoment(image, 2, 1) - getCentralMoment(image, 0, 3)) ** 2
+    return phi1, phi2, phi3
+
 
 def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
     scales = []
@@ -310,9 +316,9 @@ def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
 
     for im in images:
         pixelsNoScaled.append(getOnePixels(im))
-        nuInvariant[0].append(getNuInvariant(im, 0, 0))
-        nuInvariant[1].append(getNuInvariant(im, 1, 1))
-        nuInvariant[2].append(getNuInvariant(im, 2, 2))
+        nuInvariant[0].append(getEtaInvariant(im, 0, 0))
+        nuInvariant[1].append(getEtaInvariant(im, 1, 1))
+        nuInvariant[2].append(getEtaInvariant(im, 2, 2))
 
     for i in range(images.__len__()):
         root = np.sqrt(pixelsNoScaled[i])
@@ -321,9 +327,9 @@ def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
         if scale != 1:
             scaledImage = scaleImage(images[i], scale=scale)
         scaledImages.append(images[i])
-        nuInvariantScaled[0].append(getNuInvariant(scaledImage, 0, 0))
-        nuInvariantScaled[1].append(getNuInvariant(scaledImage, 1, 1))
-        nuInvariantScaled[2].append(getNuInvariant(scaledImage, 2, 2))
+        nuInvariantScaled[0].append(getEtaInvariant(scaledImage, 0, 0))
+        nuInvariantScaled[1].append(getEtaInvariant(scaledImage, 1, 1))
+        nuInvariantScaled[2].append(getEtaInvariant(scaledImage, 2, 2))
 
         scales.append(scale)
     
