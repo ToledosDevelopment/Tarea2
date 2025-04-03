@@ -47,6 +47,8 @@ def getOnePixels(image : Image):
     return count
 
 def interpolate(pixels, x, y):
+    12, 5
+    12.56, 5.6
     # obtenemos las coordenadas de los 4 puntos mas cercanos a x,y
     x_floor = int(np.floor(x))
     y_floor = int(np.floor(y))
@@ -304,21 +306,20 @@ def getPhiInvariants(image : Image):
     return phi1, phi2, phi3
 
 
-def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
+def ScaleImagesAndGetInvariants(image : Image, images : (Image)):
     scales = []
     scaledImages = []
     pixelsNoScaled = []
     # pixelsScaled = []
     pixelsBaseImage = getOnePixels(image)
     base = np.sqrt(pixelsBaseImage)
-    nuInvariant = [[] for _ in range(3)]
-    nuInvariantScaled = [[] for _ in range(3)]
+    nuInvariants = []
+    nuInvariantsScaled = []
 
     for im in images:
         pixelsNoScaled.append(getOnePixels(im))
-        nuInvariant[0].append(getEtaInvariant(im, 0, 0))
-        nuInvariant[1].append(getEtaInvariant(im, 1, 1))
-        nuInvariant[2].append(getEtaInvariant(im, 2, 2))
+        etaInvariants = (getEtaInvariant(im, 0, 0), getEtaInvariant(im, 1, 1), getEtaInvariant(im, 2, 2))
+        nuInvariants.append(etaInvariants)
 
     for i in range(images.__len__()):
         root = np.sqrt(pixelsNoScaled[i])
@@ -326,11 +327,30 @@ def ScaleImagesToEqualOnePixels(image : Image, images : (Image)):
         scaledImage = images[i]
         if scale != 1:
             scaledImage = scaleImage(images[i], scale=scale)
+            setImageID(scaledImage)
         scaledImages.append(images[i])
-        nuInvariantScaled[0].append(getEtaInvariant(scaledImage, 0, 0))
-        nuInvariantScaled[1].append(getEtaInvariant(scaledImage, 1, 1))
-        nuInvariantScaled[2].append(getEtaInvariant(scaledImage, 2, 2))
+        etaInvariants = (getEtaInvariant(scaledImage, 0, 0), getEtaInvariant(scaledImage, 1, 1), getEtaInvariant(scaledImage, 2, 2))
+        nuInvariantsScaled.append(etaInvariants)
 
         scales.append(scale)
-    
-    return scaledImages, nuInvariant, nuInvariantScaled, scales
+
+    return scaledImages, nuInvariants, nuInvariantsScaled, scales
+
+def RotateImagesAndGetInvariants(images : (Image)):
+    rotatedImages : list[any] = []
+    rotatedDegrees : list[int] = []
+    phiInvariants = [[] for _ in range(3)]
+    phiInvariantsRotated = [[] for _ in range(3)]
+
+
+    for im in images:
+        degrees = np.random.randint(30, 331) # para qeu sean ángulos que si se notan
+        rotatedDegrees.append(degrees)
+        phiInvariants.append(getPhiInvariants(im))
+        im = rotateImage(im, degrees)
+        rotatedImages.append(im)
+        phiInvariantsRotated.append(getPhiInvariants(im))
+
+    return rotatedImages, phiInvariants, phiInvariantsRotated, rotatedDegrees
+
+        
