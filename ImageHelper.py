@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import hashlib
 import os
+import cv2
 import matplotlib.pyplot as plt
 from JSONHelper import JSONHelper
 
@@ -108,6 +109,37 @@ def plotBinaryImagesFromFolder(TxtDir: str, outputDir: str):
     
     print("Txt Images ploted and saved successfully!")
 
+def getContours(dataArray):
+    dataArray = np.uint8(dataArray * 255)
+
+    # Find contours using 8-connectivity (cv2.RETR_EXTERNAL for outermost contours)
+    contours, _ = cv2.findContours(dataArray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an empty image to store the contours
+    contour_image = np.zeros_like(dataArray, dtype=int)
+
+    # Draw contours in the new image
+    cv2.drawContours(contour_image, contours, -1, 1, 1)  # Draw with value 1
+
+    return contour_image
+
+def getContoursOfFolder(TxtDir: str, outputDir: str):
+    os.makedirs(outputDir, exist_ok=True)
+
+    for file in os.listdir(TxtDir):
+        if file.endswith(".txt"):
+            txt_path = os.path.join(TxtDir, file)
+            output_path = os.path.join(outputDir, f"contour_{file}")
+
+            # Load binary pixel data
+            pixels = loadTxtImage(txt_path)
+
+            contour_img = getContours(pixels)
+
+            np.savetxt(output_path,contour_img,fmt='%d')
+
+            print(f"{file} procesado -> {output_path}")
+    pass
 
 def getOnePixels(image : Image):
     height, width  = image.size
