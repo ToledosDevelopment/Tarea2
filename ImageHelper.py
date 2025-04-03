@@ -36,16 +36,22 @@ def getTxtImageFile(image: Image, filePath: str):
     if pixels is not None:
         np.savetxt(filePath, pixels.reshape(-1, pixels.shape[-1]), fmt="%d")
 
+def loadImages(imageDir: str):
+    imgList = os.listdir(imageDir)
+    images = [Image.open(os.path.join(imageDir, img)) for img in imgList]
+
+    for im in images:
+        im.id = getImageID(im)
+    
+    return images
+
 def getTxtImagesFromFolder(inputDir: str, outputDir: str):
         # Ensure the output directory exists
     os.makedirs(outputDir, exist_ok=True)
 
     # Load images
     imgList = os.listdir(inputDir)
-    images = [Image.open(os.path.join(inputDir, img)) for img in imgList]
-
-    for im in images:
-        im.id = getImageID(im)
+    images = loadImages(inputDir)
 
     scaledImages = ScaleImagesToEqualOnePixels(images[0],images)[0]
 
