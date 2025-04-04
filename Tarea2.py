@@ -32,6 +32,8 @@ baseImage = images[0]
 scaledImages, etaInvariants, etaInvariantsScaled, scales, opx, opxScaled = ImageHelper.scaleImagesAndGetInvariants(baseImage, images)
 TableHelper.presentEtaInvariantsOnTable(imgList, scales, etaInvariants, etaInvariantsScaled, opx, opxScaled)
 
+# Con la función getTxtImagesFromFolder() generamos los archivos txt de las imagenes originales ya en aproximadamente la misma escala de 1-pixeles
+
 # Punto 5
 
 # ImageHelper.plotBinaryImagesFromFolder(txt_dir,plot_img_dir)
@@ -41,8 +43,6 @@ TableHelper.presentEtaInvariantsOnTable(imgList, scales, etaInvariants, etaInvar
 # ImageHelper.plotBinaryImageNoGridFromFolder(contour_txt_dir,"contour_images")
 
 # ImageHelper.getContoursOfFolder(txt_dir,contour_txt_dir)
-
-# MorphologyHelper.getMorphImagesFromFolder(txt_dir,morph_dir)
 
 # Punto 7
 
@@ -55,3 +55,8 @@ TableHelper.presentMuInvariantsOnTable(imgList, translations, muInvariants, muIn
 # rotamos las imágenes y obtenemos los invariantes de phi
 scaledImages, phiInvariants, phiInvariantsScaled, degrees = ImageHelper.rotateImagesAndGetInvariants(images)
 TableHelper.presentPhiInvariantsOnTable(imgList, degrees, phiInvariants, phiInvariantsScaled)
+
+# Punto 9
+# Generamos los cambios mofologicos y remarcamos las diferencias con la imagen original con color verde
+
+# MorphologyHelper.getMorphImagesFromFolder(txt_dir,morph_dir)
