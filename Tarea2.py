@@ -13,7 +13,7 @@ contour_txt_dir = "contour_txt_images"
 morph_dir = "morph_images"
 
 # obtenemos las imágenes de la carpeta de imágenes
-imgList =  os.listdir("imagenes")[0:5]
+imgList =  os.listdir("imagenes")
 images = []
 for imPath in imgList:
     with Image.open(os.path.join("imagenes", imPath)) as im:
