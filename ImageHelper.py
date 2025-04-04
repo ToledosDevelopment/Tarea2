@@ -47,8 +47,6 @@ def getOnePixels(image : Image):
     return count
 
 def interpolate(pixels, x, y):
-    12, 5
-    12.56, 5.6
     # obtenemos las coordenadas de los 4 puntos mas cercanos a x,y
     x_floor = int(np.floor(x))
     y_floor = int(np.floor(y))
@@ -77,6 +75,33 @@ def interpolate(pixels, x, y):
         decimal_x * decimal_y * p4 # contribucion de p4
     )
     return interpolated
+
+def addPaddingToImage(image : Image, mx : int, my : int):
+    xl, xr = int(mx/2), int(mx/2)
+    yt, yb = int(my/2), int(my/2)
+
+    pixels = getPixels(image)
+    heigth, width = pixels.shape[0], pixels.shape[1]
+
+    paddedPixels = None
+
+    if image.mode == "RGB":
+        paddedPixels = np.zeros((heigth + yt + yb, width + xl + xr, 3), np.uint8)
+
+    else:
+        paddedPixels = np.zeros((heigth + yt + yb, width + xl + xr), np.uint8)
+    
+    for y in range(heigth):
+        for x in range(width):
+            paddedPixels[y + yt, x + xl] = pixels[y, x]
+
+    paddedImage = Image.fromarray(paddedPixels)
+    setImageID(paddedImage)
+
+    return paddedImage
+
+    
+    
 
 def scaleImage(image : Image, scale):
     pixels = getPixels(image)
@@ -125,6 +150,8 @@ def translateImage(image : Image, tx : int = 0, ty : int = 0):
     newHeight = height + abs(ty)
     newWidth = width + abs(tx)
 
+    ty*=-1
+
     if image.mode == "RGB":
         image_translated = np.zeros((newHeight,newWidth,3), dtype=np.uint8)
     else:
@@ -134,7 +161,15 @@ def translateImage(image : Image, tx : int = 0, ty : int = 0):
     for y in range(height):
         for x in range(width):
             new_x = x + tx
-            new_y = y + ty
+            if ty < 0:
+                new_y = y
+            else:
+                new_y = y + ty
+            
+            if tx < 0:
+                new_x = x
+            else:
+                new_x = x + tx
             if 0 <= new_x < newWidth and 0 <= new_y < newHeight:
                 image_translated[new_y, new_x] = pixels[y, x] 
 
@@ -145,18 +180,20 @@ def translateImage(image : Image, tx : int = 0, ty : int = 0):
 def rotateImage(image : Image, degrees : float):
     degrees = math.radians(degrees)
 
-    image_rotated = None
-    pixels = getPixels(image)
-    width, height  = pixels.shape[1], pixels.shape[0]
+    paddedImage = addPaddingToImage(image, 100, 100)
 
-    massCenter = getMassCenter(image)
+    image_rotated = None
+    pixels = getPixels(paddedImage)
+    width, height = pixels.shape[1], pixels.shape[0]
+
+    massCenter = getMassCenter(paddedImage)
     x_center = int(massCenter['x'])
     y_center = int(massCenter['y'])
     rotation_matrix = np.transpose(np.array([[np.cos(degrees), -np.sin(degrees)], 
                                [np.sin(degrees), np.cos(degrees)]
                             ]))
 
-    if image.mode == "RGB":
+    if paddedImage.mode == "RGB":
         image_rotated = np.zeros((height, width, 3), dtype=np.uint8)
         for y in range(height):
             for x in range(width):
@@ -190,7 +227,9 @@ def rotateImage(image : Image, degrees : float):
 
                 # nos aseguramos que no salga de los limites de 0 y 255 con la funcion  de np.clip
                 image_rotated[y, x] = np.clip(int(interpolated), a_min=0, a_max = 255)
-    return Image.fromarray(image_rotated)
+    rImage = Image.fromarray(image_rotated)
+    setImageID(rImage)
+    return rImage
         
 
 # ESTA ES MANTENIENDO LAS DIMENSIONES DE LA IMAGEN, PERO ESO NO QUIERE EL PROFESOR
@@ -246,7 +285,7 @@ def getMassCenter(image: Image):
     cache.set_value(path, massCenter)
     return massCenter
 
-def getCentralMoment(image : Image, p : int, q : int): # this one is translation invariant
+def getMuInvariant(image : Image, p : int, q : int): # this one is translation invariant
     pixels = getPixels(image)
     massCenter = getMassCenter(image)
     width, height = pixels.shape[1], pixels.shape[0]
@@ -291,35 +330,35 @@ def getEtaInvariant(image : Image, p : int, q : int):
     if npq != None:
         return npq
 
-    m00 = getCentralMoment(image, 0, 0)
+    m00 = getMuInvariant(image, 0, 0)
 
-    mpq = getCentralMoment(image, p, q)
+    mpq = getMuInvariant(image, p, q)
 
     npq = mpq / m00**((p+q)/2 + 1)
     cache.set_value(npqPath, npq)
     return npq
 
 def getPhiInvariants(image : Image):
-    phi1 = getCentralMoment(image, 2, 0) + getCentralMoment(image, 0, 2)
-    phi2 = getCentralMoment(image, 2, 0) - getCentralMoment(image, 0, 2) ** 2 + 4 * getCentralMoment(image, 1, 1) ** 2
-    phi3 = (getCentralMoment(image, 3, 0) - 3 * getCentralMoment(image, 1, 2)) ** 2 + (3 * getCentralMoment(image, 2, 1) - getCentralMoment(image, 0, 3)) ** 2
+    phi1 = getMuInvariant(image, 2, 0) + getMuInvariant(image, 0, 2)
+    phi2 = getMuInvariant(image, 2, 0) - getMuInvariant(image, 0, 2) ** 2 + 4 * getMuInvariant(image, 1, 1) ** 2
+    phi3 = (getMuInvariant(image, 3, 0) - 3 * getMuInvariant(image, 1, 2)) ** 2 + (3 * getMuInvariant(image, 2, 1) - getMuInvariant(image, 0, 3)) ** 2
     return phi1, phi2, phi3
 
 
-def ScaleImagesAndGetInvariants(image : Image, images : (Image)):
+def scaleImagesAndGetInvariants(image : Image, images : (Image)):
     scales = []
     scaledImages = []
     pixelsNoScaled = []
     # pixelsScaled = []
     pixelsBaseImage = getOnePixels(image)
     base = np.sqrt(pixelsBaseImage)
-    nuInvariants = []
-    nuInvariantsScaled = []
+    etaInvariants = []
+    etaInvariantsScaled = []
 
     for im in images:
         pixelsNoScaled.append(getOnePixels(im))
-        etaInvariants = (getEtaInvariant(im, 0, 0), getEtaInvariant(im, 1, 1), getEtaInvariant(im, 2, 2))
-        nuInvariants.append(etaInvariants)
+        invariants = (getEtaInvariant(im, 0, 0), getEtaInvariant(im, 1, 1), getEtaInvariant(im, 2, 2))
+        etaInvariants.append(invariants)
 
     for i in range(images.__len__()):
         root = np.sqrt(pixelsNoScaled[i])
@@ -329,18 +368,43 @@ def ScaleImagesAndGetInvariants(image : Image, images : (Image)):
             scaledImage = scaleImage(images[i], scale=scale)
             setImageID(scaledImage)
         scaledImages.append(images[i])
-        etaInvariants = (getEtaInvariant(scaledImage, 0, 0), getEtaInvariant(scaledImage, 1, 1), getEtaInvariant(scaledImage, 2, 2))
-        nuInvariantsScaled.append(etaInvariants)
+        invariants = (getEtaInvariant(scaledImage, 0, 0), getEtaInvariant(scaledImage, 1, 1), getEtaInvariant(scaledImage, 2, 2))
+        etaInvariantsScaled.append(invariants)
 
         scales.append(scale)
 
-    return scaledImages, nuInvariants, nuInvariantsScaled, scales
+    return scaledImages, etaInvariants, etaInvariantsScaled, scales
 
-def RotateImagesAndGetInvariants(images : (Image)):
+def translateImagesAndGetInvariants(images : (Image)):
+    translations = []
+    translatedImages = []
+    muInvariants = []
+    muInvariantsTranslated = []
+
+    for image in images:
+        m00 = getMuInvariant(image, 0, 0)
+        m11 = getMuInvariant(image, 1, 1)
+        m22 = getMuInvariant(image, 2, 2)
+
+        muInvariants.append((m00, m11, m22))
+
+        x, y = np.random.randint(-250, 250), np.random.randint(-250, 250)
+        translations.append((x,y))
+        translatedImage = translateImage(image, x, y)
+        translatedImages.append(image)
+
+        m00 = getMuInvariant(translatedImage, 0, 0)
+        m11 = getMuInvariant(translatedImage, 1, 1)
+        m22 = getMuInvariant(translatedImage, 2, 2)
+
+        muInvariantsTranslated.append((m00, m11, m22))
+    return translatedImages, muInvariants, muInvariantsTranslated, translations
+
+def rotateImagesAndGetInvariants(images : (Image)):
     rotatedImages : list[any] = []
     rotatedDegrees : list[int] = []
-    phiInvariants = [[] for _ in range(3)]
-    phiInvariantsRotated = [[] for _ in range(3)]
+    phiInvariants = []
+    phiInvariantsRotated = []
 
 
     for im in images:
@@ -348,9 +412,8 @@ def RotateImagesAndGetInvariants(images : (Image)):
         rotatedDegrees.append(degrees)
         phiInvariants.append(getPhiInvariants(im))
         im = rotateImage(im, degrees)
+        setImageID(im)
         rotatedImages.append(im)
         phiInvariantsRotated.append(getPhiInvariants(im))
 
-    return rotatedImages, phiInvariants, phiInvariantsRotated, rotatedDegrees
-
-        
+    return rotatedImages, phiInvariants, phiInvariantsRotated, rotatedDegrees  
