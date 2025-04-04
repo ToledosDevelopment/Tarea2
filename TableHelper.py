@@ -5,12 +5,16 @@ def presentEtaInvariantsOnTable(
     imagesNames: List[str],
     scales: List[int],
     etaInvariants: List[Tuple[float, float, float]],
-    etaInvariantsScaled: List[Tuple[float, float, float]]
+    etaInvariantsScaled: List[Tuple[float, float, float]],
+    onePixels: List[int],
+    onePixelsScaled: List[int],
 ) -> None:
     # Create table headers
     headers = [
         "Imagen",
         "Factor de Escalado",
+        "No. 1px",
+        "No. 1px Escalada",
         "η00",
         "η11",
         "η22",
@@ -20,13 +24,15 @@ def presentEtaInvariantsOnTable(
     ]
     
     rows = []
-    for name, scale, eta, scaled_eta in zip(imagesNames, scales, etaInvariants, etaInvariantsScaled):
+    for name, scale, eta, scaled_eta, opx, opxScaled in zip(imagesNames, scales, etaInvariants, etaInvariantsScaled, onePixels, onePixelsScaled):
         eta00, eta11, eta22 = eta
         scaled_eta00, scaled_eta11, scaled_eta22 = scaled_eta
         
         rows.append([
             name,
             scale,
+            opx,
+            opxScaled,
             f"{eta00:.6f}",
             f"{eta11:.6f}",
             f"{eta22:.6f}",

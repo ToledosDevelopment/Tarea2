@@ -56,7 +56,7 @@ def getTxtImagesFromFolder(inputDir: str, outputDir: str):
     images = loadImages(inputDir)
 
     # Los .txt serán a partir de las imgs escaladas a 1 pixeles
-    scaledImages = ScaleImagesToEqualOnePixels(images[0],images)[0]
+    scaledImages = scaleImagesAndGetInvariants(images[0],images)[0]
 
     for im, filename in zip(scaledImages, imgList):
         
@@ -490,32 +490,38 @@ def getPhiInvariants(image : Image):
 def scaleImagesAndGetInvariants(image : Image, images : (Image)):
     scales = []
     scaledImages = []
-    pixelsNoScaled = []
-    # pixelsScaled = []
+    onePixels = []
+    onePixelsScaled = []
     pixelsBaseImage = getOnePixels(image)
     base = np.sqrt(pixelsBaseImage)
     etaInvariants = []
     etaInvariantsScaled = []
 
     for im in images:
-        pixelsNoScaled.append(getOnePixels(im))
+        onePixels.append(getOnePixels(im))
         invariants = (getEtaInvariant(im, 0, 0), getEtaInvariant(im, 1, 1), getEtaInvariant(im, 2, 2))
         etaInvariants.append(invariants)
 
     for i in range(images.__len__()):
-        root = np.sqrt(pixelsNoScaled[i])
+        # obtenemos el factor de escalado
+        root = np.sqrt(onePixels[i])
         scale = (base - root) / root + 1
+
+        # declaramos nuestra variable donde guardaremos la imagen escalada
         scaledImage = images[i]
-        if scale != 1:
+        if scale != 1: # escalamos solo en caso de que sea necesario
             scaledImage = scaleImage(images[i], scale=scale)
             setImageID(scaledImage)
+        
+        # agregamos toda la informacion post escalar
         scaledImages.append(images[i])
+        onePixelsScaled.append(getOnePixels(scaledImage))
         invariants = (getEtaInvariant(scaledImage, 0, 0), getEtaInvariant(scaledImage, 1, 1), getEtaInvariant(scaledImage, 2, 2))
         etaInvariantsScaled.append(invariants)
 
         scales.append(scale)
 
-    return scaledImages, etaInvariants, etaInvariantsScaled, scales
+    return scaledImages, etaInvariants, etaInvariantsScaled, scales, onePixels, onePixelsScaled
 
 def translateImagesAndGetInvariants(images : (Image)):
     translations = []
