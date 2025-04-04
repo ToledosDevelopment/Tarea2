@@ -15,3 +15,7 @@ a) Quitar ruido
 b) Suavizar bordes 
 c) Rellenar huecos 
 d) Encontrar sus esqueletos
+
+# Visualización de las tablas de comparación de los invariantes
+
+El código del archivo Tarea2.py está diseñado para que pueda ejecutarse y se puedan visualizar en la consola las tablas de los invariantes de las imágenes.
