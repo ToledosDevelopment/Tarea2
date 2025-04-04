@@ -1,6 +1,9 @@
 from PIL import Image
 import numpy as np
 import hashlib
+import os
+import cv2
+import matplotlib.pyplot as plt
 from JSONHelper import JSONHelper
 import math
 
@@ -28,6 +31,145 @@ def getPixels(image : Image):
     else:
         pixel_values = np.array(pixel_values).reshape((width, height, channels))
     return pixel_values
+
+def getTxtImageFile(image: Image, filePath: str):
+    pixels = getPixels(image)
+    pixels[pixels == 255] = 1
+    if pixels is not None:
+        np.savetxt(filePath, pixels.reshape(-1, pixels.shape[-1]), fmt="%d")
+
+def loadImages(imageDir: str):
+    imgList = os.listdir(imageDir)
+    images = [Image.open(os.path.join(imageDir, img)) for img in imgList]
+
+    for im in images:
+        im.id = getImageID(im)
+    
+    return images
+
+def getTxtImagesFromFolder(inputDir: str, outputDir: str):
+        # Ensure the output directory exists
+    os.makedirs(outputDir, exist_ok=True)
+
+    # Load images
+    imgList = os.listdir(inputDir)
+    images = loadImages(inputDir)
+
+    # Los .txt serán a partir de las imgs escaladas a 1 pixeles
+    scaledImages = ScaleImagesToEqualOnePixels(images[0],images)[0]
+
+    for im, filename in zip(scaledImages, imgList):
+        
+        # Generate output file path with same filename but .txt extension
+        txt_filename = os.path.splitext(filename)[0] + ".txt"
+        txt_filepath = os.path.join(outputDir, txt_filename)
+        
+        # Generate and save txt file
+        getTxtImageFile(im,txt_filepath)
+
+    print("Txt image files saved successfully!")
+
+# Function to read the txt file and reconstruct the binary image
+def loadTxtImage(file_path):
+    pixels = np.loadtxt(file_path, dtype=int)
+    return pixels
+
+def plotBinaryImageNoGrid(pixels, output_path):
+    fig, ax = plt.subplots(figsize=(6, 6))
+
+    # Create a grid visualization
+    ax.imshow(pixels, cmap="gray", interpolation="nearest")
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    # Save the plot
+    plt.savefig(output_path, bbox_inches='tight', dpi=300)
+    plt.close()
+
+def plotBinaryImageNoGridFromFolder(TxtDir: str, outputDir: str):
+    os.makedirs(outputDir, exist_ok=True)
+    for txt_file in os.listdir(TxtDir):
+        if txt_file.endswith(".txt"):
+            txt_path = os.path.join(TxtDir, txt_file)
+            output_path = os.path.join(outputDir, txt_file.replace(".txt", ".png"))
+
+            # Load binary pixel data
+            pixels = loadTxtImage(txt_path)
+
+            # Generate and save visualization
+            plotBinaryImageNoGrid(pixels, output_path)
+    
+    print("Txt Images ploted and saved successfully!")
+
+# Function to generate a visualization of the 1-pixel cells
+def plotBinaryImage(pixels, output_path):
+    fig, ax = plt.subplots(figsize=(6, 6))
+
+    # Create a grid visualization
+    ax.imshow(pixels, cmap="gray", interpolation="nearest")
+
+    # Add grid lines
+    ax.set_xticks(np.arange(-0.5, pixels.shape[1], 1), minor=True)
+    ax.set_yticks(np.arange(-0.5, pixels.shape[0], 1), minor=True)
+    ax.grid(which="minor", color="r", linestyle='-', linewidth=0.5)
+
+    # Remove ticks and labels
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    # Save the plot
+    plt.savefig(output_path, bbox_inches='tight', dpi=300)
+    plt.close()
+
+def plotBinaryImagesFromFolder(TxtDir: str, outputDir: str):
+
+    os.makedirs(outputDir, exist_ok=True)
+
+    for txt_file in os.listdir(TxtDir):
+        if txt_file.endswith(".txt"):
+            txt_path = os.path.join(TxtDir, txt_file)
+            output_path = os.path.join(outputDir, txt_file.replace(".txt", ".png"))
+
+            # Load binary pixel data
+            pixels = loadTxtImage(txt_path)
+
+            # Generate and save visualization
+            plotBinaryImage(pixels, output_path)
+    
+    print("Txt Images ploted and saved successfully!")
+
+def getContours(dataArray):
+    dataArray = np.uint8(dataArray * 255)
+
+    # Find contours using 8-connectivity (cv2.RETR_EXTERNAL for outermost contours)
+    contours, _ = cv2.findContours(dataArray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an empty image to store the contours
+    contour_image = np.zeros_like(dataArray, dtype=int)
+
+    # Draw contours in the new image
+    cv2.drawContours(contour_image, contours, -1, 1, 1)  # Draw with value 1
+
+    return contour_image
+
+def getContoursOfFolder(TxtDir: str, outputDir: str):
+    os.makedirs(outputDir, exist_ok=True)
+
+    for file in os.listdir(TxtDir):
+        if file.endswith(".txt"):
+            txt_path = os.path.join(TxtDir, file)
+            output_path = os.path.join(outputDir, f"contour_{file}")
+
+            # Load binary pixel data
+            pixels = loadTxtImage(txt_path)
+
+            contour_img = getContours(pixels)
+
+            np.savetxt(output_path,contour_img,fmt='%d')
+
+            print(f"{file} procesado -> {output_path}")
+    pass
 
 def getOnePixels(image : Image):
     height, width  = image.size
