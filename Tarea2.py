@@ -40,9 +40,10 @@ TableHelper.presentEtaInvariantsOnTable(imgList, scales, etaInvariants, etaInvar
 
 # Punto 6
 
+# ImageHelper.getContoursOfFolder(txt_dir,contour_txt_dir)
+
 # ImageHelper.plotBinaryImageNoGridFromFolder(contour_txt_dir,"contour_images")
 
-# ImageHelper.getContoursOfFolder(txt_dir,contour_txt_dir)
 
 # Punto 7
 
