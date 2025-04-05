@@ -43,7 +43,7 @@ def process_image(filepath, kernel):
     # Highlight differences in blue
     highlighted_denoised = highlight_changes(original_bgr, denoised)
     highlighted_smoothed = highlight_changes(original_bgr, smoothed)
-    highlighted_filled = highlight_changes(original_bgr, filled)
+    highlighted_filled = cv2.cvtColor(filled, cv2.COLOR_GRAY2BGR)
     highlighted_skeleton = cv2.cvtColor(skeleton, cv2.COLOR_GRAY2BGR)  # Convert to 3-channel grayscale, lo mantiene igual pero lo cambia a triple canal
 
     return binary_image, highlighted_denoised, highlighted_smoothed, highlighted_filled, highlighted_skeleton
